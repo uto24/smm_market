@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced SMM Panel Market Analysis Tool BD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+     <!-- Bootstrap Icons -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6f42c1; /* Custom purple */
+            --secondary-color: #e9ecef;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: #fff;
+            --card-header-bg: var(--primary-color);
+            --card-header-color: white;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .container {
+            max-width: 1400px; /* Increased max-width for wider table */
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--card-bg);
+         }
+
+        .card-header {
+            background-color: var(--card-header-bg);
+            color: var(--card-header-color);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+        }
+         h1, h2 {
+             color: var(--primary-color);
+         }
+         .card-header h2 {
+              color: var(--card-header-color);
+         }
+
+
+        .market-viewer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .market-viewer-item:last-child {
+            border-bottom: none;
+        }
+        .market-viewer-item a {
+            flex-grow: 1;
+            margin-right: 10px;
+            word-break: break-all;
+            color: var(--primary-color);
+             text-decoration: none;
+        }
+        .market-viewer-item a:hover {
+             text-decoration: underline;
+        }
+         .copy-btn {
+             flex-shrink: 0;
+         }
+
+        .iframe-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            margin-bottom: 20px;
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ccc;
+             background-color: white;
+        }
+
+        .editable {
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+             transition: background-color 0.2s ease;
+        }
+         .editable:hover {
+             background-color: var(--secondary-color);
+         }
+         .editable:focus {
+             outline: none;
+             box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+             background-color: white;
+         }
+         td.editable.editing {
+             background-color: white;
+         }
+
+         .table th, .table td {
+           vertical-align: middle;
+           padding: 0.75rem;
+           border-color: var(--border-color);
+           word-break: break-word; /* Allow text wrapping in table cells */
+         }
+         .table th {
+            background-color: var(--secondary-color);
+        }
+
+         /* Optional: Define column widths for better layout */
+         .table th:nth-child(1), .table td:nth-child(1) { width: 4%; } /* Serial No. */
+         .table th:nth-child(2), .table td:nth-child(2) { width: 7%; } /* Panel ID */
+         .table th:nth-child(3), .table td:nth-child(3) { width: 10%; } /* Category */
+         .table th:nth-child(4), .table td:nth-child(4) { width: auto; min-width: 150px; } /* Service Name */
+         .table th:nth-child(5), .table td:nth-child(5) { width: 20%; min-width: 180px;} /* Description */
+         .table th:nth-child(6), .table td:nth-child(6) { width: 9%; } /* Panel Buy Price */
+         .table th:nth-child(7), .table td:nth-child(7) { width: 7%; } /* Min/Max */
+         .table th:nth-child(8), .table td:nth-child(8) { width: 9%; } /* Your Sell Price */
+         .table th:nth-child(9), .table td:nth-child(9) { width: 9%; } /* Profit */
+         .table th:nth-child(10), .table td:nth-child(10) { width: 7%; } /* Actions */
+
+
+         /* Animation for added rows */
+        .table-row-add {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+         /* Animation for removed rows */
+        .table-row-remove {
+             animation: fadeOut 0.5s ease-in-out forwards;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(10px); }
+        }
+
+        /* Style for profit/loss */
+        .text-success { color: #198754 !important; }
+        .text-danger { color: #dc3545 !important; }
+        .text-warning { color: #ffc107 !important; }
+
+         /* Style for total profit */
+         #total-profit-area {
+             font-size: 1.2rem;
+             font-weight: bold;
+             margin-top: 15px;
+             padding: 10px;
+             border: 1px solid var(--border-color);
+             border-radius: 5px;
+             background-color: var(--secondary-color);
+         }
+         #total-profit-area .profit-value {
+             margin-left: 15px; /* Space between USD and BDT totals */
+         }
+
+
+         #final-result-output, #notepad-textarea {
+             width: 100%;
+             font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+             font-size: 0.9rem;
+             padding: 10px;
+             border-color: var(--border-color);
+             border-radius: 5px;
+             resize: vertical;
+              min-height: 100px;
+         }
+         #final-result-output { height: 250px; } /* Slightly larger height */
+         #notepad-textarea { height: 200px; }
+
+
+         .btn-primary, .btn-success, .btn-danger {
+             --bs-btn-bg: var(--primary-color);
+             --bs-btn-border-color: var(--primary-color);
+             --bs-btn-hover-bg: #5e37a3;
+             --bs-btn-hover-border-color: #5e37a3;
+             --bs-btn-focus-shadow-rgb: 111,66,193;
+             --bs-btn-active-bg: #533192;
+             --bs-btn-active-border-color: #533192;
+         }
+         .btn-outline-primary {
+             --bs-btn-color: var(--primary-color);
+             --bs-btn-border-color: var(--primary-color);
+             --bs-btn-hover-color: #fff;
+             --bs-btn-hover-bg: var(--primary-color);
+             --bs-btn-hover-border-color: var(--primary-color);
+             --bs-btn-active-color: #fff;
+             --bs-btn-active-bg: #5e37a3;
+             --bs-btn-active-border-color: #5e37a3;
+             --bs-btn-disabled-color: var(--primary-color);
+             --bs-btn-disabled-border-color: var(--primary-color);
+         }
+          .btn-outline-danger {
+              --bs-btn-color: #dc3545;
+              --bs-btn-border-color: #dc3545;
+              --bs-btn-hover-color: #fff;
+              --bs-btn-hover-bg: #dc3545;
+              --bs-btn-hover-border-color: #dc3545;
+          }
+
+         /* Calculator Styles (Keep as is) */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+        }
+
+        .calculator-display {
+            grid-column: span 4;
+            background-color: #222;
+            color: white;
+            text-align: end;
+            padding: 10px;
+            font-size: 2em;
+            overflow: hidden;
+            border-radius: 5px;
+            word-break: break-all;
+             min-height: 1.5em;
+        }
+
+        .calculator-grid button {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #fff;
+            transition: background-color 0.1s ease;
+        }
+
+        .calculator-grid button:hover {
+            background-color: #d5d5d5;
+        }
+
+        .calculator-grid button.operator {
+            background-color: #ff9800;
+            color: white;
+        }
+         .calculator-grid button.operator:hover {
+             background-color: #f57c00;
+         }
+
+        .calculator-grid button.equals {
+            background-color: #4caf50;
+            color: white;
+            grid-column: span 2;
+        }
+         .calculator-grid button.equals:hover {
+             background-color: #388e3c;
+         }
+
+         .calculator-grid button.clear,
+         .calculator-grid button.all-clear {
+             background-color: #f44336;
+             color: white;
+         }
+          .calculator-grid button.clear:hover,
+          .calculator-grid button.all-clear:hover {
+              background-color: #d32f2f;
+          }
+          .calculator-grid button.all-clear {
+               grid-column: span 2;
+          }
+
+
+        /* Print Styles */
+        @media print {
+             /* Hide non-essential UI elements during print */
+             #reset-data-btn, #print-data-btn, .table-actions,
+             #copy-feedback, form, .input-group,
+             .btn, .form-label, .alert {
+                 display: none !important;
+             }
+
+             /* Ensure editable cells don't look like inputs in print */
+             .editable {
+                 border: none !important;
+                 cursor: default !important;
+                 background-color: transparent !important;
+                 padding: 0.75rem !important;
+                 box-shadow: none !important;
+             }
+
+              /* Ensure cards and their content are not broken across pages */
+             .card, .card-body, .table-responsive, .row {
+                  page-break-inside: avoid;
+                  break-inside: avoid;
+                  margin-bottom: 15px !important;
+             }
+
+              /* Table specific print styles */
+             table {
+                 border-collapse: collapse !important;
+                 width: 100% !important;
+                 margin-bottom: 0 !important;
+             }
+             th, td {
+                 border: 1px solid #ccc !important;
+                 padding: 8px !important;
+                 background-color: white !important;
+                 color: #000 !important;
+                 box-shadow: none !important;
+                 text-align: left !important;
+                 word-break: break-word !important; /* Keep word wrapping */
+             }
+             thead th {
+                 background-color: #eee !important;
+             }
+            .table-striped tbody tr:nth-of-type(odd) > * {
+                 background-color: #f9f9f9 !important;
+            }
+            /* Specific column widths for print if needed, or let content flow */
+             .table th:nth-child(1), .table td:nth-child(1) { width: 4%; }
+             .table th:nth-child(2), .table td:nth-child(2) { width: 7%; }
+             .table th:nth-child(3), .table td:nth-child(3) { width: 10%; }
+             .table th:nth-child(4), .table td:nth-child(4) { width: auto;}
+             .table th:nth-child(5), .table td:nth-child(5) { width: 20%;}
+             .table th:nth-child(6), .table td:nth-child(6) { width: 9%; }
+             .table th:nth-child(7), .table td:nth-child(7) { width: 7%; }
+             .table th:nth-child(8), .table td:nth-child(8) { width: 9%; }
+             .table th:nth-child(9), .table td:nth-child(9) { width: 9%; }
+             .table th:nth-child(10), .table td:nth-child(10) { width: 7%; }
+
+
+             /* Style specific sections for print */
+             h1, h2 {
+                 color: #000 !important;
+                 page-break-after: avoid;
+             }
+             p {
+                 page-break-after: avoid;
+             }
+             /* Iframe */
+             .iframe-container {
+                  padding-top: 0 !important;
+                  height: 400px !important;
+                  overflow: hidden !important;
+                  border: 1px solid #ccc !important;
+             }
+             .iframe-container iframe {
+                  position: static !important;
+                  width: 100% !important;
+                  height: 100% !important;
+                  border: none !important;
+             }
+
+             /* Calculator display - only display part */
+             .calculator-grid {
+                  display: grid !important;
+                  grid-template-columns: repeat(4, 1fr) !important;
+                   grid-gap: 5px !important;
+                  max-width: 300px !important;
+                  margin: 10px auto !important;
+                  padding: 5px !important;
+                  background-color: #eee !important;
+                  border: 1px solid #ccc !important;
+             }
+             .calculator-display {
+                 background-color: #eee !important;
+                 color: #000 !important;
+                 border: 1px solid #ccc !important;
+                 grid-column: span 4 !important;
+                 padding: 5px !important;
+                 font-size: 1.5em !important;
+             }
+              .calculator-grid button {
+                  display: none !important;
+              }
+
+
+             /* Notepad and Final List textareas */
+             #notepad-textarea, #final-result-output {
+                  border: 1px solid #ccc !important;
+                  background-color: #fff !important;
+                  color: #000 !important;
+                  resize: none !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                  white-space: pre-wrap !important;
+                  min-height: 80px !important;
+             }
+
+             /* Total Profit Area */
+              #total-profit-area {
+                  border: 1px solid #ccc !important;
+                  background-color: #eee !important;
+                  font-size: 1em !important;
+                  font-weight: bold !important;
+                  padding: 5px !important;
+                  margin-top: 10px !important;
+                  text-align: right !important;
+                  color: #000 !important;
+              }
+              #total-profit-area .profit-value {
+                   color: #000 !important; /* Ensure profit value is black */
+                   margin-left: 10px !important; /* Adjust margin for print */
+              }
+
+             .container {
+                  width: 100% !important;
+                  max-width: none !important;
+                  padding: 0 !important;
+             }
+             body {
+                 padding-top: 0 !important;
+                 padding-bottom: 0 !important;
+             }
+
+
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-center my-4">Advanced SMM Panel Market Analysis Tool BD</h1>
+        <p class="text-center text-muted">Analyze SMM Service Prices (Per 1000 Units) and calculate profit for Reselling.</p>
+
+         <!-- Exchange Rate Input -->
+         <div class="card mb-3">
+              <div class="card-body py-3"> <!-- Reduced padding -->
+                  <div class="row align-items-center">
+                      <div class="col-md-4 col-lg-3">
+                           <label for="usd-to-bdt-rate-input" class="form-label mb-0 fw-bold">USD to BDT Exchange Rate:</label>
+                      </div>
+                       <div class="col-md-4 col-lg-3">
+                           <input type="number" class="form-control form-control-sm" id="usd-to-bdt-rate-input" step="0.01" min="1" value="110" placeholder="e.g., 110">
+                       </div>
+                        <div class="col-md-4 col-lg-6">
+                             <span class="text-muted small">Set the current rate to see prices in BDT.</span>
+                        </div>
+                  </div>
+              </div>
+         </div>
+
+
+        <!-- Action Buttons (Reset & Print) -->
+        <div class="row mb-3">
+             <div class="col-md-6 mb-2 mb-md-0">
+                  <button class="btn btn-outline-danger w-100" id="reset-data-btn">
+                     <i class="bi bi-trash"></i> Reset All Analysis Data
+                  </button>
+             </div>
+              <div class="col-md-6">
+                 <button class="btn btn-outline-primary w-100" id="print-data-btn">
+                    <i class="bi bi-printer"></i> Print All Data
+                 </button>
+              </div>
+        </div>
+
+
+        <!-- Market Viewer Section (Keep as is) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Market Viewer (Example Panels)</h2>
+            </div>
+            <div class="card-body">
+                <p>Here are some example SMM Panel websites. Click the copy button to quickly copy their URL.</p>
+                <div id="competitor-list">
+                    <!-- Example SMM Panels -->
+                    <div class="market-viewer-item">
+                        <a href="https://hdsmmpanel.com" target="_blank">hdsmmpanel.com</a>
+                        <button class="btn btn-sm btn-outline-primary copy-btn" data-url="https://hdsmmpanel.com"><i class="bi bi-copy"></i> Copy</button>
+                    </div>
+                     <div class="market-viewer-item">
+                        <a href="https://bulkfollows.com/" target="_blank">bulkfollows.com</a>
+                        <button class="btn btn-sm btn-outline-primary copy-btn" data-url="https://bulkfollows.com/"><i class="bi bi-copy"></i> Copy</button>
+                    </div>
+                     <div class="market-viewer-item">
+                        <a href="https://smmfollows.com/" target="_blank">smmfollows.com</a>
+                        <button class="btn btn-sm btn-outline-primary copy-btn" data-url="https://smmfollows.com/"><i class="bi bi-copy"></i> Copy</button>
+                    </div>
+                     <div class="market-viewer-item">
+                        <a href="https://justanotherpanel.com/" target="_blank">justanotherpanel.com</a>
+                        <button class="btn btn-sm btn-outline-primary copy-btn" data-url="https://justanotherpanel.com/"><i class="bi bi-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web Iframe Viewer Section (Keep as is) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Panel/Website Viewer (via Iframe)</h2>
+            </div>
+            <div class="card-body">
+                <p>Enter a panel or website URL below to view it directly within this page. Useful for checking service lists and prices quickly without leaving the tool.</p>
+                <div class="input-group mb-3">
+                    <input type="url" id="iframe-url-input" class="form-control" placeholder="Enter Panel/Website URL (e.g., https://hdsmmpanel.com/services)">
+                    <button class="btn btn-primary" type="button" id="load-iframe-btn"><i class="bi bi-globe"></i> Load Website</button>
+                </div>
+                <div class="iframe-container">
+                     <iframe id="website-iframe" src="" title="Website Viewer" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+                </div>
+                <div class="alert alert-info" role="alert">
+                   Note: Some websites may block being displayed in an iframe due to security policies (X-Frame-Options). You may need to open them in a new tab.
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculator and Notepad Section (Keep as is) -->
+         <div class="row">
+             <!-- Calculator Card -->
+             <div class="col-md-6">
+                 <div class="card">
+                     <div class="card-header">
+                         <h2>Calculator</h2>
+                     </div>
+                     <div class="card-body">
+                          <p>Use this calculator for quick price conversions or calculations.</p>
+                         <div class="calculator-grid">
+                             <div class="calculator-display" id="calc-display">0</div>
+                             <button class="all-clear" id="calc-all-clear">AC</button>
+                             <button class="clear" id="calc-clear">C</button>
+                             <button class="operator" data-operator="/">÷</button>
+                             <button data-number="7">7</button>
+                             <button data-number="8">8</button>
+                             <button data-number="9">9</button>
+                             <button class="operator" data-operator="*">×</button>
+                             <button data-number="4">4</button>
+                             <button data-number="5">5</button>
+                             <button data-number="6">6</button>
+                             <button class="operator" data-operator="-">-</button>
+                             <button data-number="1">1</button>
+                             <button data-number="2">2</button>
+                             <button data-number="3">3</button>
+                             <button class="operator" data-operator="+">+</button>
+                             <button data-number="0">0</button>
+                             <button data-decimal=".">.</button>
+                             <button class="equals" id="calc-equals">=</button>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+
+             <!-- Notepad Card -->
+             <div class="col-md-6">
+                  <div class="card">
+                      <div class="card-header">
+                          <h2>Notepad</h2>
+                      </div>
+                      <div class="card-body">
+                           <p>Use this notepad for quick notes (e.g., service descriptions, customer info). Content is saved automatically in your browser.</p>
+                          <textarea id="notepad-textarea" class="form-control" placeholder="Type your notes here..."></textarea>
+                           <div class="text-end mt-2">
+                                <button class="btn btn-outline-danger btn-sm" id="clear-notepad-btn">
+                                     <i class="bi bi-trash"></i> Clear Notepad
+                                </button>
+                           </div>
+
+                      </div>
+                  </div>
+             </div>
+         </div>
+
+
+        <!-- Data Input Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Add Service Data from Panel</h2>
+            </div>
+            <div class="card-body">
+                 <p>Enter details for an SMM service to analyze prices and calculate profit. Prices are typically per 1000 units.</p>
+                <form id="product-data-form">
+                    <div class="row g-3">
+                         <div class="col-md-2">
+                            <label for="panel-id-input" class="form-label">Panel Service ID:</label>
+                            <input type="text" class="form-control" id="panel-id-input" required placeholder="e.g., 12345">
+                        </div>
+                         <div class="col-md-3">
+                             <label for="category-input" class="form-label">Category / Platform:</label>
+                             <input type="text" class="form-control" id="category-input" placeholder="e.g., Facebook, YouTube, TikTok">
+                         </div>
+                        <div class="col-md-7">
+                            <label for="item-name-input" class="form-label">Service Name:</label>
+                            <input type="text" class="form-control" id="item-name-input" required placeholder="e.g., HQ Non-Drop Followers">
+                        </div>
+                         <div class="col-12">
+                             <label for="description-input" class="form-label">Description / Notes:</label>
+                             <input type="text" class="form-control" id="description-input" placeholder="e.g., Instant start, Lifetime refill, Max 100k">
+                         </div>
+                        <div class="col-md-3">
+                            <label for="buy-rate-input" class="form-label">Panel Buy Price (1k USD):</label>
+                            <input type="number" class="form-control" id="buy-rate-input" step="0.01" min="0" required placeholder="e.g., 0.85">
+                        </div>
+                         <div class="col-md-3">
+                             <label for="min-max-input" class="form-label">Min/Max Quantity:</label>
+                             <input type="text" class="form-control" id="min-max-input" placeholder="e.g., 100/100000">
+                         </div>
+                         <div class="col-md-3">
+                              <label for="sell-rate-input" class="form-label text-primary fw-bold">Your Sell Price (1k USD):</label>
+                              <input type="number" class="form-control border-primary border-2" id="sell-rate-input" step="0.01" min="0" required placeholder="Your Price USD (e.g., 1.20)">
+                         </div>
+                         <!-- Calculated BDT price will be shown in the table -->
+                    </div>
+                    <button type="submit" class="btn btn-success mt-3"><i class="bi bi-plus-circle"></i> Add Service</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Data Output Section -->
+        <div class="card">
+             <div class="card-header">
+                <h2>SMM Service Analysis Data</h2>
+            </div>
+            <div class="card-body">
+                <p>Here is the service data you've added. Double-click on 'Category', 'Service Name', 'Description', 'Panel Buy Price', or 'Your Sell Price' cells to edit them directly.</p>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="data-output-table">
+                        <thead>
+                            <tr>
+                                <th>Serial</th>
+                                <th>Panel ID</th>
+                                <th>Category</th>
+                                <th>Service Name</th>
+                                <th>Description / Notes</th>
+                                <th>Panel Buy Price (1k)</th>
+                                <th>Min/Max Quantity</th>
+                                <th>Your Sell Price (1k)</th>
+                                <th>Profit (1k)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data rows will be added here by JavaScript -->
+                            <tr id="no-data-row">
+                                <td colspan="10" class="text-center text-muted">No data added yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="total-profit-area" class="text-end">
+                    Total Profit (Sum of Profit per 1k):
+                    <span class="profit-value" id="total-profit-usd">0.00 USD</span> |
+                    <span class="profit-value" id="total-profit-bdt">0.00 ৳</span>
+                </div>
+
+                 <div class="alert alert-info mt-3" role="alert">
+                    <strong>Note on Prices & Profit:</strong>
+                    <ul>
+                        <li>All prices and profit values are shown per 1000 units.</li>
+                         <li>Panel Buy Price (1k) and Your Sell Price (1k) are entered in USD. The calculated BDT values are based on the set Exchange Rate.</li>
+                         <li>Profit (Per 1k) = Your Sell Price (1k USD) - Panel Buy Price (1k USD). This profit is then also converted to BDT.</li>
+                         <li>Total Profit is the sum of 'Profit (Per 1k)' for all services listed, shown in both USD and BDT.</li>
+                         <li>Double-click cells in the table (Category, Service Name, Description, Prices) to edit them.</li>
+                    </ul>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Final Result Section -->
+         <div class="card">
+             <div class="card-header">
+                 <h2>Final Selling Prices List (for Facebook/Posting)</h2>
+             </div>
+             <div class="card-body">
+                 <p>This list is formatted for easy copying to social media or price lists.</p>
+                 <div class="alert alert-secondary" role="alert">
+                      Format: ✅ [Category] - [Service Name] 💵 [Your Sell Price BDT] Tk (Min: [Min Order])
+                      <br>Example: ✅ Facebook - HQ Non-Drop Followers 💵 132 Tk (Min: 100)
+                 </div>
+                 <textarea id="final-result-output" readonly class="form-control mb-3" placeholder="Your list will appear here..."></textarea>
+                 <button class="btn btn-primary" id="copy-result-btn"><i class="bi bi-clipboard"></i> Copy List</button>
+                 <span id="copy-feedback" class="ms-3 text-success" style="display: none;"><i class="bi bi-check-lg"></i> Copied!</span>
+             </div>
+         </div>
+
+
+    </div> <!-- End Container -->
+
+    <!-- Bootstrap JS Bundle (popper.js and bootstrap.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DOM Elements ---
+            const usdToBdtRateInput = document.getElementById('usd-to-bdt-rate-input'); // New Element
+            const competitorList = document.getElementById('competitor-list');
+            const iframeUrlInput = document.getElementById('iframe-url-input');
+            const loadIframeBtn = document.getElementById('load-iframe-btn');
+            const websiteIframe = document.getElementById('website-iframe');
+            const productDataForm = document.getElementById('product-data-form');
+            const panelIdInput = document.getElementById('panel-id-input');
+            const categoryInput = document.getElementById('category-input'); // New Element
+            const itemNameInput = document.getElementById('item-name-input'); // serviceName
+            const descriptionInput = document.getElementById('description-input'); // New Element
+            const buyRateInput = document.getElementById('buy-rate-input'); // panelBuyPriceUSD
+            const minMaxInput = document.getElementById('min-max-input');
+            const sellRateInput = document.getElementById('sell-rate-input'); // yourSellPriceUSD
+            const dataOutputTableBody = document.querySelector('#data-output-table tbody');
+            const noDataRow = document.getElementById('no-data-row');
+            const totalProfitUsdSpan = document.getElementById('total-profit-usd'); // Updated Element
+            const totalProfitBdtSpan = document.getElementById('total-profit-bdt'); // Updated Element
+            const finalResultOutput = document.getElementById('final-result-output');
+            const copyResultBtn = document.getElementById('copy-result-btn');
+            const copyFeedbackSpan = document.getElementById('copy-feedback');
+            const resetDataBtn = document.getElementById('reset-data-btn');
+            const printDataBtn = document.getElementById('print-data-btn');
+
+            // Calculator Elements (Keep as is)
+            const calcDisplay = document.getElementById('calc-display');
+            const calcButtons = document.querySelectorAll('.calculator-grid button');
+            const calcAllClearBtn = document.getElementById('calc-all-clear');
+            const calcClearBtn = document.getElementById('calc-clear');
+            const calcEqualsBtn = document.getElementById('calc-equals');
+
+            // Notepad Elements (Keep as is)
+            const notepadTextarea = document.getElementById('notepad-textarea');
+            const clearNotepadBtn = document.getElementById('clear-notepad-btn');
+
+
+            // --- Data Storage Keys ---
+            const productDataStorageKey = 'smmPanelAnalysisDataBD_v2'; // Updated Key for new structure
+            const notepadStorageKey = 'notepadContentSMMBD_v2'; // Updated Key
+            const usdToBdtRateStorageKey = 'usdToBdtRateSMMBD_v2'; // New Key
+
+
+            // --- Data ---
+            let productData = []; // Holds the analysis data
+            let usdToBdtRate = 110; // Default rate
+
+
+            // --- Calculator State (Keep as is) ---
+            let currentInput = '0';
+            let firstOperand = null;
+            let operator = null;
+            let waitingForSecondOperand = false;
+
+
+            // --- Functions ---
+
+             // --- Calculator Functions (Keep as is) ---
+             function updateCalcDisplay() {
+                 const displayValue = String(currentInput);
+                 if (displayValue.includes('.') && displayValue.length > 15) {
+                      calcDisplay.textContent = parseFloat(displayValue).toFixed(10).substring(0, 15) + '...';
+                 } else if (displayValue.length > 15) {
+                      calcDisplay.textContent = displayValue.substring(0, 15) + '...';
+                 }
+                 else {
+                      calcDisplay.textContent = displayValue;
+                 }
+            }
+
+            function resetCalculator() {
+                 currentInput = '0';
+                 firstOperand = null;
+                 operator = null;
+                 waitingForSecondOperand = false;
+                 updateCalcDisplay();
+            }
+
+             function clearLastInput() {
+                 if (currentInput === 'Error') {
+                      resetCalculator();
+                      return;
+                 }
+                 if (waitingForSecondOperand) {
+                       operator = null;
+                       waitingForSecondOperand = false;
+                       updateCalcDisplay();
+                      return;
+                 }
+                 currentInput = currentInput.slice(0, -1) || '0';
+                 updateCalcDisplay();
+             }
+
+            function handleNumber(number) {
+                 if (currentInput === 'Error') {
+                     resetCalculator();
+                 }
+                 if (currentInput.length >= 15 && !waitingForSecondOperand) {
+                    return;
+                 }
+                if (waitingForSecondOperand === true) {
+                    currentInput = number;
+                    waitingForSecondOperand = false;
+                } else {
+                    if (currentInput === '0' && number === '0') return;
+                     if (currentInput === '0' && number !== '0' && number !== '.') {
+                        currentInput = number;
+                    } else {
+                       currentInput += number;
+                    }
+                }
+                updateCalcDisplay();
+            }
+
+            function handleDecimal(dot) {
+                 if (currentInput === 'Error') {
+                     resetCalculator();
+                 }
+                 if (waitingForSecondOperand === true) {
+                      currentInput = '0.'
+                      waitingForSecondOperand = false;
+                      updateCalcDisplay();
+                      return;
+                 }
+                if (!currentInput.includes(dot)) {
+                    currentInput += dot;
+                }
+                 updateCalcDisplay();
+            }
+
+            function handleOperator(nextOperator) {
+                 if (currentInput === 'Error') {
+                     operator = null;
+                      return;
+                 }
+
+                const inputValue = parseFloat(currentInput);
+
+                if (operator && waitingForSecondOperand) {
+                    operator = nextOperator;
+                    return;
+                }
+
+                 if (isNaN(inputValue)) {
+                      currentInput = 'Error';
+                     operator = null;
+                     firstOperand = null;
+                     waitingForSecondOperand = false;
+                     updateCalcDisplay();
+                     return;
+                 }
+
+                if (firstOperand === null) {
+                    firstOperand = inputValue;
+                } else if (operator) {
+                    const result = performCalculation[operator](firstOperand, inputValue);
+
+                    if (result === 'Error' || !isFinite(result)) {
+                         currentInput = 'Error';
+                         firstOperand = null;
+                         operator = null;
+                         waitingForSecondOperand = false;
+                         updateCalcDisplay();
+                         return;
+                    }
+
+                    currentInput = String(result);
+                    firstOperand = result;
+                }
+
+                waitingForSecondOperand = true;
+                operator = nextOperator;
+            }
+
+             const performCalculation = {
+                 '/': (firstOperand, secondOperand) => {
+                      if (secondOperand === 0) return 'Error';
+                      return firstOperand / secondOperand;
+                 },
+                 '*': (firstOperand, secondOperand) => firstOperand * secondOperand,
+                 '+': (firstOperand, secondOperand) => firstOperand + secondOperand,
+                 '-': (firstOperand, secondOperand) => firstOperand - secondOperand,
+             };
+
+            function handleEquals() {
+                 if (currentInput === 'Error' || operator === null || waitingForSecondOperand) {
+                    return;
+                }
+
+                const inputValue = parseFloat(currentInput);
+
+                 if (isNaN(inputValue)) {
+                      currentInput = 'Error';
+                 } else {
+                      const result = performCalculation[operator](firstOperand, inputValue);
+
+                      if (result === 'Error' || !isFinite(result)) {
+                           currentInput = 'Error';
+                      } else {
+                         currentInput = String(result);
+                      }
+                 }
+
+                firstOperand = null;
+                operator = null;
+                waitingForSecondOperand = true;
+
+                updateCalcDisplay();
+            }
+
+
+            // --- Notepad Functions (Keep as is) ---
+            function loadNotepad() {
+                const savedContent = localStorage.getItem(notepadStorageKey);
+                if (savedContent !== null) {
+                    notepadTextarea.value = savedContent;
+                } else {
+                     notepadTextarea.value = '';
+                }
+            }
+
+            function saveNotepad() {
+                localStorage.setItem(notepadStorageKey, notepadTextarea.value);
+            }
+
+            function clearNotepad() {
+                 if (confirm('Are you sure you want to clear the notepad?')) {
+                    notepadTextarea.value = '';
+                    localStorage.removeItem(notepadStorageKey);
+                 }
+            }
+
+
+            // --- Data Analysis & Table Rendering Functions ---
+
+             // Function to load the exchange rate from Local Storage
+            function loadExchangeRate() {
+                const savedRate = localStorage.getItem(usdToBdtRateStorageKey);
+                 // Use parseFloat to convert the stored string to a number, default to 1 if invalid
+                 usdToBdtRate = parseFloat(savedRate) || 110; // Default to 110 if loading fails
+                 // Update the input field display
+                 usdToBdtRateInput.value = usdToBdtRate;
+                 // console.log("Exchange rate loaded:", usdToBdtRate);
+            }
+
+            // Function to save the exchange rate to Local Storage
+            function saveExchangeRate() {
+                 // Get the value from the input field, ensure it's a number
+                 const rate = parseFloat(usdToBdtRateInput.value);
+                 // Only save if it's a valid number and > 0, otherwise keep previous rate or default
+                 if (!isNaN(rate) && rate > 0) {
+                     usdToBdtRate = rate; // Update the internal variable
+                     localStorage.setItem(usdToBdtRateStorageKey, usdToBdtRate);
+                     // console.log("Exchange rate saved:", usdToBdtRate);
+                 } else {
+                      // If input is invalid, revert input field to current valid rate
+                     usdToBdtRateInput.value = usdToBdtRate; // Revert the display
+                     alert('Invalid exchange rate entered. Please enter a valid number greater than 0.'); // Provide feedback
+                 }
+
+                // Always re-render the table and totals when rate might have changed
+                renderTable();
+            }
+
+
+            // Function to calculate Profit (USD and BDT)
+            function calculateProfit(buyRateUSD, sellRateUSD, exchangeRate) {
+                 const buyUSD = parseFloat(buyRateUSD);
+                 const sellUSD = parseFloat(sellRateUSD);
+                 const rate = parseFloat(exchangeRate);
+
+                 // Handle invalid numeric inputs for buy/sell rates
+                 if (isNaN(buyUSD) || isNaN(sellUSD)) {
+                      console.warn("Invalid numeric input for profit calculation:", buyRateUSD, sellRateUSD);
+                      return { usd: 0, bdt: 0 }; // Return 0 for invalid inputs
+                 }
+
+                 const profitUSD = sellUSD - buyUSD;
+
+                 // Handle invalid exchange rate, default to 0 BDT profit if rate is invalid
+                 const profitBDT = (isNaN(rate) || rate <= 0) ? 0 : profitUSD * rate;
+
+                 return {
+                     usd: parseFloat(profitUSD.toFixed(4)), // Store USD profit with slightly more precision
+                     bdt: parseFloat(profitBDT.toFixed(2)) // Store BDT profit rounded to 2 decimals
+                 };
+            }
+
+             // Function to format profit cell with color
+            function formatProfitCell(profitUSD, profitBDT) {
+                const profitValueUSD = parseFloat(profitUSD);
+                 const profitValueBDT = parseFloat(profitBDT);
+
+                if (isNaN(profitValueUSD) || isNaN(profitValueBDT)) return `<span class="text-muted">N/A</span>`;
+
+                let className = 'text-muted';
+                if (profitValueUSD > 0) {
+                    className = 'text-success';
+                } else if (profitValueUSD < 0) {
+                    className = 'text-danger';
+                } else {
+                    className = 'text-warning';
+                }
+                // Display both USD and BDT profit
+                 const displayValue = `<span class="${className}">${profitValueUSD.toFixed(2)} USD / ${profitValueBDT.toFixed(2)} ৳</span>`; // Display USD and BDT
+                 return displayValue;
+            }
+
+             // Function to calculate total profit (Sum of Profit per 1k for all services)
+            function calculateTotalProfit() {
+                let totalUSD = 0;
+                let totalBDT = 0;
+
+                productData.forEach(product => {
+                    // Ensure profit values are valid numbers before adding
+                    const profitUSD = parseFloat(product.profit.usd);
+                    const profitBDT = parseFloat(product.profit.bdt);
+                    totalUSD += (isNaN(profitUSD) ? 0 : profitUSD);
+                    totalBDT += (isNaN(profitBDT) ? 0 : profitBDT);
+                });
+
+                 totalProfitUsdSpan.textContent = totalUSD.toFixed(2) + ' USD';
+                 totalProfitBdtSpan.textContent = totalBDT.toFixed(2) + ' ৳';
+
+                 // Color the total profit text based on USD total
+                 if (totalUSD > 0) {
+                      totalProfitUsdSpan.classList.remove('text-danger', 'text-warning');
+                      totalProfitUsdSpan.classList.add('text-success');
+                      totalProfitBdtSpan.classList.remove('text-danger', 'text-warning'); // Color BDT based on USD profit
+                      totalProfitBdtSpan.classList.add('text-success');
+                 } else if (totalUSD < 0) {
+                      totalProfitUsdSpan.classList.remove('text-success', 'text-warning');
+                      totalProfitUsdSpan.classList.add('text-danger');
+                       totalProfitBdtSpan.classList.remove('text-success', 'text-warning');
+                       totalProfitBdtSpan.classList.add('text-danger');
+                 } else {
+                      totalProfitUsdSpan.classList.remove('text-success', 'text-danger');
+                      totalProfitUsdSpan.classList.add('text-warning');
+                       totalProfitBdtSpan.classList.remove('text-success', 'text-danger');
+                       totalProfitBdtSpan.classList.add('text-warning');
+                 }
+            }
+
+            // Function to generate and display the final result list (Facebook format)
+            function updateFinalResultList() {
+                 const listItems = productData.map(product => {
+                     const category = product.category || 'General';
+                     const serviceName = product.itemName || 'Unnamed Service'; // Using itemName for service name
+                     const sellPriceUSD = parseFloat(product.sellRate); // Using sellRate for Your Sell Price USD
+                     const minOrder = product.minOrder || 'N/A';
+
+                     // Calculate BDT Sell Price using the current exchange rate
+                     const sellPriceBDT = (isNaN(sellPriceUSD) || isNaN(usdToBdtRate) || usdToBdtRate <= 0) ? 'N/A' : (sellPriceUSD * usdToBdtRate).toFixed(2);
+
+                     // Format for the list: ✅ [Category] - [Service Name] 💵 [Your Sell Price BDT] Tk (Min: [Min Order])
+                     return `✅ ${category} - ${serviceName} 💵 ${sellPriceBDT} Tk (Min: ${minOrder})`;
+                 });
+
+                 finalResultOutput.value = listItems.join('\n');
+            }
+
+
+            // Function to render the table from the productData array
+            function renderTable() {
+                // console.log("Rendering table with data:", productData);
+
+                dataOutputTableBody.innerHTML = '';
+
+                if (productData.length === 0) {
+                    noDataRow.style.display = 'table-row';
+                     dataOutputTableBody.appendChild(noDataRow);
+                } else {
+                     noDataRow.style.display = 'none';
+
+                    productData.forEach((product, index) => {
+                        const row = document.createElement('tr');
+                        row.setAttribute('data-id', product.id);
+                        row.classList.add('table-row-add');
+
+                        // Ensure numeric properties are numbers before formatting/displaying
+                         const panelBuyPriceUSD = parseFloat(product.panelBuyPrice) || 0; // Default to 0 if NaN
+                         const sellRateUSD = parseFloat(product.sellRate) || 0; // Default to 0 if NaN
+
+                         // Calculate BDT values based on current rate
+                         const panelBuyPriceBDT = isNaN(usdToBdtRate) || usdToBdtRate <= 0 ? 'N/A' : (panelBuyPriceUSD * usdToBdtRate).toFixed(2);
+                         const sellRateBDT = isNaN(usdToBdtRate) || usdToBdtRate <= 0 ? 'N/A' : (sellRateUSD * usdToBdtRate).toFixed(2);
+
+
+                         // Use the formatProfitCell function for the profit column
+                         const profitDisplayHTML = formatProfitCell(product.profit.usd, product.profit.bdt);
+
+                        // Add data cells - Ensure order matches table headers
+                        row.innerHTML = `
+                            <td>${index + 1}</td> <!-- Serial -->
+                            <td>${product.panelId || 'N/A'}</td> <!-- Panel ID (Not Editable) -->
+                            <td class="editable" data-field="category">${product.category || 'General'}</td> <!-- Category (Editable) -->
+                            <td class="editable" data-field="itemName">${product.itemName || 'Unnamed Service'}</td> <!-- Service Name (Editable) -->
+                            <td class="editable" data-field="description">${product.description || 'N/A'}</td> <!-- Description (Editable) -->
+                            <td class="editable" data-field="panelBuyPrice">
+                                ${panelBuyPriceUSD.toFixed(2)} USD <br> (${panelBuyPriceBDT !== 'N/A' ? panelBuyPriceBDT + ' ৳' : 'N/A'})
+                            </td> <!-- Panel Buy Price (Editable, displays both) -->
+                            <td>${product.minOrder || 'N/A'}/${product.maxOrder || 'N/A'}</td> <!-- Min/Max (Not Editable) -->
+                            <td class="editable" data-field="sellRate">
+                                ${sellRateUSD.toFixed(2)} USD <br> (${sellRateBDT !== 'N/A' ? sellRateBDT + ' ৳' : 'N/A'})
+                            </td> <!-- Your Sell Price (Editable, displays both) -->
+                            <td>${profitDisplayHTML}</td> <!-- Profit (Calculated, Not Editable) -->
+                            <td class="table-actions">
+                                <button class="btn btn-sm btn-danger delete-btn"><i class="bi bi-trash"></i> Delete</button>
+                            </td>
+                        `;
+                        dataOutputTableBody.appendChild(row);
+
+                         row.addEventListener('animationend', function handler() {
+                             row.removeEventListener('animationend', handler);
+                             row.classList.remove('table-row-add');
+                         }, { once: true });
+                    });
+                }
+                 calculateTotalProfit(); // Recalculate totals
+                 updateFinalResultList(); // Update the final list
+                 saveData(); // Save current state including calculated values based on rate
+            }
+
+            // Function to add data from the form
+            function addData(event) {
+                event.preventDefault();
+
+                const panelId = panelIdInput.value.trim();
+                const category = categoryInput.value.trim(); // New field
+                const itemName = itemNameInput.value.trim();
+                const description = descriptionInput.value.trim(); // New field
+                const panelBuyPrice = parseFloat(buyRateInput.value); // This is USD input
+                const minMax = minMaxInput.value.trim();
+                const sellRate = parseFloat(sellRateInput.value); // This is USD input
+
+                if (panelId === '' || !itemName || isNaN(panelBuyPrice) || panelBuyPrice < 0 || isNaN(sellRate) || sellRate < 0) {
+                    alert('Please enter valid Panel Service ID, Service Name, Panel Buy Price (USD), and Your Sell Price (USD). Min/Max and Category are optional.');
+                    return;
+                }
+
+                 const [minOrder, maxOrder] = minMax.split('/').map(s => s.trim());
+
+                // Calculate profit in both USD and BDT using the current rate
+                const profit = calculateProfit(panelBuyPrice, sellRate, usdToBdtRate);
+
+                 const id = Date.now() + Math.random().toString(36).substring(2, 15);
+
+                const newData = {
+                    id: id,
+                    panelId: panelId,
+                    category: category || 'General', // Store category, default to 'General'
+                    itemName: itemName,
+                    description: description || 'N/A', // Store description
+                    panelBuyPrice: panelBuyPrice, // Stored as USD
+                    minOrder: minOrder || 'N/A',
+                    maxOrder: maxOrder || 'N/A',
+                    sellRate: sellRate, // Stored as USD
+                    profit: profit // Stored as { usd: ..., bdt: ... } object
+                };
+
+                productData.push(newData);
+                // console.log("Data added:", newData);
+                renderTable(); // Update the table display (calls saveData)
+
+                // Clear the form except potentially the Panel ID and Category for quick entry
+                // productDataForm.reset(); // Don't reset everything
+                panelIdInput.value = ''; // Optionally clear
+                // categoryInput.value = ''; // Optionally clear
+                itemNameInput.value = '';
+                descriptionInput.value = '';
+                buyRateInput.value = '';
+                minMaxInput.value = '';
+                sellRateInput.value = '';
+
+                itemNameInput.focus(); // Focus on item name for next entry
+            }
+
+            // --- Function to handle saving edits from an editable cell ---
+             function saveEditedCell(cell) {
+                  if (!cell || !cell.classList.contains('editing')) {
+                     return;
+                  }
+
+                 // Turn off contenteditable FIRST
+                 cell.contentEditable = false;
+
+                 const row = cell.closest('tr');
+                 const field = cell.getAttribute('data-field');
+                 const newValue = cell.textContent.trim();
+                 const originalValue = cell.getAttribute('data-original-value'); // Get original string value
+                 const rowId = row.getAttribute('data-id');
+
+                  cell.removeAttribute('data-original-value'); // Clean up attribute
+
+
+                  const productIndex = productData.findIndex(p => p.id === rowId);
+                 if (productIndex === -1) {
+                     console.error("Row data not found for ID:", rowId);
+                     // Revert cell content if data object is missing or ID not found
+                     cell.textContent = originalValue;
+                     cell.classList.remove('editing'); // Ensure editing class is removed
+                     return;
+                 }
+
+                 let product = productData[productIndex]; // Get reference to the actual object
+                 let updated = false; // Flag to see if anything meaningful changed
+
+                  // console.log(`Saving edit for ID: ${rowId}, Field: "${field}", New Value: "${newValue}", Original Value: "${originalValue}"`); // Debugging
+
+                  // --- Update the specific field ---
+                  if (field === 'category' || field === 'itemName' || field === 'description') {
+                      if (newValue !== originalValue) {
+                          product[field] = newValue; // Update the string field
+                          updated = true;
+                           // console.log(`${field} updated to: "${product[field]}"`); // Debug
+                      } else {
+                           // If no change, just revert the display to original string value (handles leading/trailing spaces)
+                          cell.textContent = originalValue;
+                      }
+                       // Remove editing class after handling string edits
+                       cell.classList.remove('editing');
+                  } else if (field === 'panelBuyPrice' || field === 'sellRate') {
+                      // For numeric fields, parse the new value
+                      const newNumericValue = parseFloat(newValue);
+                      // Need the original numeric value for comparison
+                       // Assuming originalValue string for price cells was something like "1.20 USD" or "120 Tk"
+                       // We stored the *numeric* original USD value when starting edit.
+                       const originalNumericValue = parseFloat(cell.getAttribute('data-original-numeric-value')); // Retrieve original number
+
+
+                      if (!isNaN(newNumericValue) && newNumericValue >= 0) { // Check if new input is a valid non-negative number
+                          // Check if the numeric value actually changed (comparing numbers).
+                          // Comparing fixed versions is often safer than direct float comparison.
+                          const numericValueChanged = newNumericValue.toFixed(4) !== (isNaN(originalNumericValue) ? NaN : originalNumericValue.toFixed(4)); // Compare with slightly more precision
+
+                          if (numericValueChanged) {
+                              // Update the specific price field in the product object (stored as USD)
+                              product[field] = newNumericValue;
+
+                              // Recalculate profit based on the potentially new buy price and sell price (both USD)
+                              product.profit = calculateProfit(product.panelBuyPrice, product.sellRate, usdToBdtRate); // Recalculate both USD and BDT profit
+                              updated = true;
+                               // Note: The cell display is updated by renderTable after recalculating profit
+                               // console.log(`${field} updated to: ${product[field]}, New Profit:`, product.profit); // Debug
+                          } else {
+                               // If numeric value didn't change, ensure display format is correct
+                                // Revert display to the original formatted version (e.g., "1.20 USD ...")
+                                // This requires getting the original formatted HTML, which is complex.
+                                // Simpler: Re-render the specific row's price cell display based on the *unchanged* product data.
+                                // The updateRowInTable function handles correct formatting.
+                               // console.log(`${field} numeric value did not change.`); // Debug
+                          }
+                      } else {
+                          // If input is invalid (not a non-negative number)
+                          alert(`Invalid input for ${field === 'panelBuyPrice' ? 'Panel Buy Price (USD)' : 'Your Sell Price (USD)'}. Please enter a valid non-negative number.`);
+                          // Revert display to original value, formatted if it was a number
+                          // This also requires retrieving the original formatted HTML...
+                           // For now, just revert the text content back to the original string and remove editing class.
+                           cell.textContent = originalValue; // Revert the text content
+                      }
+                       // Remove editing class after handling numeric edits
+                       cell.classList.remove('editing');
+                       cell.removeAttribute('data-original-numeric-value'); // Clean up numeric attribute
+
+                       // Ensure the cell content reflects the actual data stored after edit attempt
+                       // Re-render the specific row's cell to ensure correct USD/BDT formatting based on the product object
+                       updateRowCellsDisplay(row, product); // Pass the specific row element and updated product object
+
+                  }
+
+
+                  // --- If data was updated, update UI and save ---
+                  if (updated) {
+                      // Update derived UI elements that depend on the whole dataset
+                      calculateTotalProfit();
+                      updateFinalResultList();
+
+                      saveData(); // Save updated productData array
+                      // console.log("Data saved after update. Full data:", productData); // Debug
+                  } else {
+                       // If no update happened (e.g., invalid input or value didn't change), ensure cell display is correct
+                       // The updateRowCellsDisplay call above handles this for numeric fields.
+                       // String fields were reverted directly.
+                  }
+             }
+
+
+            // Helper function to update the display of cells in a specific row based on the product object
+            // Used after editing to ensure correct formatting (USD/BDT)
+             function updateRowCellsDisplay(rowElement, product) {
+                 const cells = rowElement.querySelectorAll('td');
+                 const currentRate = parseFloat(usdToBdtRateInput.value) || 110; // Get current rate from input
+
+
+                 // Ensure numeric properties are numbers before formatting/displaying
+                 const panelBuyPriceUSD = parseFloat(product.panelBuyPrice) || 0;
+                 const sellRateUSD = parseFloat(product.sellRate) || 0;
+
+                 // Calculate BDT values based on current rate
+                 const panelBuyPriceBDT = isNaN(currentRate) || currentRate <= 0 ? 'N/A' : (panelBuyPriceUSD * currentRate).toFixed(2);
+                 const sellRateBDT = isNaN(currentRate) || currentRate <= 0 ? 'N/A' : (sellRateUSD * currentRate).toFixed(2);
+
+                 // Use the formatProfitCell function for the profit column
+                 const profitDisplayHTML = formatProfitCell(product.profit.usd, product.profit.bdt);
+
+                 // Update cell contents by their index (0-indexed) - Match the table header order
+                 // Serial No (0) is handled by renderTable
+                 cells[1].textContent = product.panelId || 'N/A'; // Panel ID
+                 cells[2].textContent = product.category || 'General'; // Category
+                 cells[3].textContent = product.itemName || 'Unnamed Service'; // Service Name
+                 cells[4].textContent = product.description || 'N/A'; // Description
+                 cells[5].innerHTML = `
+                     ${panelBuyPriceUSD.toFixed(2)} USD <br> (${panelBuyPriceBDT !== 'N/A' ? panelBuyPriceBDT + ' ৳' : 'N/A'})
+                 `; // Panel Buy Price (use innerHTML for break/formatting)
+                 cells[6].textContent = `${product.minOrder || 'N/A'}/${product.maxOrder || 'N/A'}`; // Min/Max
+                 cells[7].innerHTML = `
+                      ${sellRateUSD.toFixed(2)} USD <br> (${sellRateBDT !== 'N/A' ? sellRateBDT + ' ৳' : 'N/A'})
+                 `; // Your Sell Price (use innerHTML)
+                 cells[8].innerHTML = profitDisplayHTML; // Profit (use innerHTML for colored span)
+                 // Actions (9) is static button
+             }
+
+
+            // Function to handle delete (using event delegation) - Keep as is
+            dataOutputTableBody.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target.closest('.delete-btn')) {
+                     const button = target.closest('.delete-btn');
+                     const row = button.closest('tr');
+                     const rowId = row.getAttribute('data-id');
+
+                      if (dataOutputTableBody.querySelector('.editing')) { // Check ANY cell is editing
+                           alert("Please finish editing before deleting.");
+                           return;
+                      }
+
+                     if (confirm('Are you sure you want to delete this item?')) {
+                          const productIndex = productData.findIndex(p => p.id === rowId);
+                          if (productIndex > -1) {
+                               productData.splice(productIndex, 1);
+
+                              row.classList.add('table-row-remove');
+                                setTimeout(() => {
+                                    if (row.parentNode) {
+                                        row.parentNode.removeChild(row);
+                                    }
+                                     renderTable(); // Re-render to update serials, total, list etc. (calls saveData)
+                               }, 500);
+                         }
+                     }
+                 }
+            });
+
+            // --- Event Listeners for Editable Cells ---
+            dataOutputTableBody.addEventListener('dblclick', (event) => {
+                const target = event.target;
+                // Only allow editing if it's an editable cell and no other cell is currently editing
+                if (target.classList.contains('editable') && !dataOutputTableBody.querySelector('.editing')) {
+                    const cell = target;
+
+                    cell.contentEditable = true;
+                    cell.classList.add('editing');
+                    cell.focus();
+
+                     // Store original value to revert if needed
+                     cell.setAttribute('data-original-value', cell.textContent.trim());
+
+                     // For numeric cells, also store the original *numeric* value (assuming USD is the primary store)
+                     if (cell.getAttribute('data-field') === 'panelBuyPrice' || cell.getAttribute('data-field') === 'sellRate') {
+                         // Extract the USD value from the current cell display (e.g., "1.20 USD <br>...")
+                          const currentUsdText = cell.textContent.split(' ')[0]; // Get the first part before " USD"
+                           const originalNumericUsd = parseFloat(currentUsdText);
+                           cell.setAttribute('data-original-numeric-value', originalNumericUsd);
+                           // Optional: Change the cell content temporarily to just the number for easier editing
+                           cell.textContent = isNaN(originalNumericUsd) ? '' : originalNumericUsd;
+                     }
+
+
+                    // Select all text in the cell for easy replacement
+                    const range = document.createRange();
+                    range.selectNodeContents(cell);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                } else if (target.classList.contains('editable') && dataOutputTableBody.querySelector('.editing')) {
+                     // If another cell is editing, provide feedback
+                    alert('Please finish editing the current cell first.');
+                }
+            });
+
+            // Handle blur (when focus leaves the cell)
+            dataOutputTableBody.addEventListener('blur', (event) => {
+                 const target = event.target;
+                 // Check if the blurred element is an editable cell that is currently in editing state
+                 if (target.classList.contains('editable') && target.classList.contains('editing')) {
+                      saveEditedCell(target); // Attempt to save the edit
+                 }
+            }, true); // Use capture phase for blur event
+
+
+             // Handle 'Enter' key press in editable cell to save
+            dataOutputTableBody.addEventListener('keypress', (event) => {
+                const target = event.target;
+                 // Check if the key is 'Enter' and the target is an editable cell being edited
+                if (event.key === 'Enter' && target.classList.contains('editable') && target.classList.contains('editing')) {
+                    event.preventDefault(); // Prevent newline
+                    target.blur(); // Trigger blur event to save
+                }
+            });
+
+
+            // Function to copy competitor link - Keep as is
+            function copyCompetitorLink(event) {
+                const button = event.target.closest('.copy-btn');
+                if (!button) return;
+
+                const url = button.getAttribute('data-url');
+
+                if (url) {
+                    navigator.clipboard.writeText(url).then(() => {
+                         const originalIconHTML = button.innerHTML;
+                         button.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                        button.classList.remove('btn-outline-primary');
+                        button.classList.add('btn-success');
+
+                        setTimeout(() => {
+                            button.innerHTML = originalIconHTML;
+                            button.classList.remove('btn-success');
+                             button.classList.add('btn-outline-primary');
+                        }, 1500);
+                    }).catch(err => {
+                        console.error('Failed to copy competitor link: ', err);
+                        alert('Failed to copy the link.');
+                    });
+                }
+            }
+
+             // Function to copy the final result list - Keep as is, but logic updated
+            function copyFinalResultList() {
+                const listText = finalResultOutput.value;
+                if (!listText.trim()) {
+                     copyFeedbackSpan.textContent = " Nothing to copy!";
+                     copyFeedbackSpan.classList.remove('text-success');
+                     copyFeedbackSpan.classList.add('text-danger');
+                     copyFeedbackSpan.style.display = 'inline';
+                      const existingIcon = copyFeedbackSpan.querySelector('.bi-check-lg');
+                       if(existingIcon) existingIcon.remove();
+
+                      setTimeout(() => {
+                         copyFeedbackSpan.style.display = 'none';
+                          copyFeedbackSpan.classList.remove('text-danger');
+                           copyFeedbackSpan.classList.add('text-success');
+                      }, 2000);
+                    return;
+                }
+
+                 navigator.clipboard.writeText(listText).then(() => {
+                     copyFeedbackSpan.textContent = " Copied!";
+                     copyFeedbackSpan.style.display = 'inline';
+                     copyFeedbackSpan.classList.remove('text-danger');
+                     copyFeedbackSpan.classList.add('text-success');
+
+                     if (!copyFeedbackSpan.querySelector('.bi-check-lg')) {
+                          const icon = document.createElement('i');
+                           icon.classList.add('bi', 'bi-check-lg');
+                           copyFeedbackSpan.prepend(icon);
+                     }
+
+                     setTimeout(() => {
+                         copyFeedbackSpan.style.display = 'none';
+                          const icon = copyFeedbackSpan.querySelector('.bi-check-lg');
+                           if(icon) icon.remove();
+                     }, 2000);
+                 }).catch(err => {
+                     console.error('Failed to copy list: ', err);
+                      copyFeedbackSpan.textContent = " Failed to copy!";
+                      copyFeedbackSpan.classList.remove('text-success');
+                      copyFeedbackSpan.classList.add('text-danger');
+                      copyFeedbackSpan.style.display = 'inline';
+                       const existingIcon = copyFeedbackSpan.querySelector('.bi-check-lg');
+                        if(existingIcon) existingIcon.remove();
+
+                       setTimeout(() => {
+                         copyFeedbackSpan.style.display = 'none';
+                          copyFeedbackSpan.classList.remove('text-danger');
+                           copyFeedbackSpan.classList.add('text-success');
+                      }, 2000);
+                 });
+            }
+
+
+            // Function to load URL in iframe - Keep as is
+            function loadIframe() {
+                let url = iframeUrlInput.value.trim();
+
+                if (!url) {
+                    alert('Please enter a URL.');
+                    return;
+                }
+
+                if (!url.match(/^[a-zA-Z]+:\/\//)) {
+                    url = 'https://' + url;
+                }
+
+                 try {
+                    new URL(url);
+                 } catch (_) {
+                     alert('Please enter a valid URL.');
+                     return;
+                 }
+
+                websiteIframe.src = url;
+                 websiteIframe.onerror = () => {
+                      console.error("Iframe failed to load. The website might be blocking iframes (X-Frame-Options).");
+                       const iframeContainer = websiteIframe.closest('.iframe-container');
+                       if (iframeContainer) {
+                            try {
+                                 const iframeDoc = websiteIframe.contentDocument || websiteIframe.contentWindow.document;
+                                 if (iframeDoc) {
+                                     iframeDoc.body.innerHTML = '<p style="padding:20px; text-align:center; color: red;">Could not load the website. It might be blocking iframes.</p>';
+                                 }
+                            } catch (e) {
+                                 // Cross-origin error, cannot access iframe content
+                            }
+                       }
+                 };
+
+            }
+
+            // Function to save analysis data to Local Storage - Updated Key
+            function saveData() {
+                 try {
+                    // Save product data
+                    localStorage.setItem(productDataStorageKey, JSON.stringify(productData));
+                    // Save exchange rate (already handled by saveExchangeRate called on input/blur)
+                    // console.log("Analysis data saved.");
+                 } catch (e) {
+                     console.error("Error saving data to Local Storage:", e);
+                     // if (e.name === 'QuotaExceededError') { alert('Local storage is full.'); }
+                 }
+            }
+
+            // Function to load analysis data from Local Storage - Updated Key and Structure
+            function loadData() {
+                const savedData = localStorage.getItem(productDataStorageKey);
+
+                if (savedData) {
+                    try {
+                         productData = JSON.parse(savedData);
+                         // Data migration/validation for potential old data or corruption
+                         productData.forEach(item => {
+                             // Ensure essential fields exist with default values if missing (for backward compatibility)
+                             item.id = item.id || Date.now() + Math.random().toString(36).substring(2, 15);
+                             item.panelId = item.panelId || 'N/A';
+                             item.category = item.category || 'General'; // New field default
+                             item.itemName = item.itemName || 'Unnamed Service';
+                             item.description = item.description || 'N/A'; // New field default
+                             item.minOrder = item.minOrder || 'N/A';
+                             item.maxOrder = item.maxOrder || 'N/A';
+
+                             // Ensure numeric fields are parsed and handle potential NaN
+                             item.panelBuyPrice = parseFloat(item.panelBuyPrice) || 0; // Default to 0 if invalid or missing
+                             item.sellRate = parseFloat(item.sellRate) || 0; // Default to 0 if invalid or missing
+
+                              // Ensure profit is an object {usd, bdt}
+                              // If profit was previously just a number, recalculate it
+                             if (typeof item.profit !== 'object' || item.profit === null) {
+                                 item.profit = calculateProfit(item.panelBuyPrice, item.sellRate, usdToBdtRate); // Use the loaded/default rate
+                             } else {
+                                  // If profit is already an object, ensure values are numbers and recalculate BDT profit based on current rate
+                                  item.profit.usd = parseFloat(item.profit.usd) || 0;
+                                  item.profit.bdt = (item.profit.usd * usdToBdtRate).toFixed(2); // Recalculate BDT profit using current rate
+                                  item.profit.bdt = parseFloat(item.profit.bdt); // Convert back to number
+                             }
+                         });
+
+                         // Optional: Filter out completely invalid items
+                         productData = productData.filter(item =>
+                              item && typeof item.panelBuyPrice === 'number' && typeof item.sellRate === 'number' && typeof item.itemName === 'string' && typeof item.profit === 'object' && item.id // Basic validation
+                         );
+
+                    } catch (e) {
+                         console.error("Error loading or parsing data from Local Storage:", e);
+                         productData = [];
+                         alert("Error loading saved analysis data. It might be corrupted. Starting with empty data.");
+                    }
+
+                } else {
+                    productData = []; // Start with empty array if no data found
+                }
+
+                 // renderTable calls saveData, calculateTotalProfit, updateFinalResultList
+                 renderTable();
+            }
+
+            // Function to reset all analysis data - Updated Key
+            function resetAllData() {
+                if (confirm('Are you sure you want to delete ALL SMM service analysis data? This cannot be undone.')) {
+                    localStorage.removeItem(productDataStorageKey);
+                     // Also reset exchange rate to default
+                    localStorage.removeItem(usdToBdtRateStorageKey);
+                    usdToBdtRate = 110; // Reset internal variable
+                    usdToBdtRateInput.value = usdToBdtRate; // Update input field
+
+                    productData = [];
+                    renderTable();
+                    alert('All analysis data has been reset.');
+                }
+            }
+
+            // Function to print all visible content - Keep as is
+            function printData() {
+                 window.print();
+            }
+
+
+            // --- Event Listeners ---
+            productDataForm.addEventListener('submit', addData);
+            loadIframeBtn.addEventListener('click', loadIframe);
+            resetDataBtn.addEventListener('click', resetAllData);
+            printDataBtn.addEventListener('click', printData);
+
+            // Event listeners for exchange rate input
+             usdToBdtRateInput.addEventListener('input', saveExchangeRate); // Save and re-render on input
+             usdToBdtRateInput.addEventListener('blur', saveExchangeRate); // Save and re-render on blur
+
+
+            // Event listeners for copy buttons (using event delegation on the parent) - Keep as is
+            competitorList.addEventListener('click', (event) => {
+                 if (event.target.closest('.copy-btn')) {
+                    copyCompetitorLink(event);
+                 }
+            });
+
+            // Event listener for copy final result button - Keep as is
+            copyResultBtn.addEventListener('click', copyFinalResultList);
+
+
+            // Add event listener for iframe input to allow loading with Enter key - Keep as is
+             iframeUrlInput.addEventListener('keypress', (e) => {
+                 if (e.key === 'Enter') {
+                     e.preventDefault();
+                     loadIframe();
+                 }
+             });
+
+            // --- Calculator Event Listeners (Keep as is) ---
+             calcButtons.forEach(button => {
+                 button.addEventListener('click', () => {
+                     const number = button.dataset.number;
+                     const operatorValue = button.dataset.operator;
+                     const decimal = button.dataset.decimal;
+                     const clear = button.classList.contains('clear');
+                     const allClear = button.classList.contains('all-clear');
+                     const equals = button.classList.contains('equals');
+
+
+                     if (number !== undefined) {
+                         handleNumber(number);
+                     } else if (operatorValue !== undefined) {
+                          handleOperator(operatorValue);
+                     } else if (decimal !== undefined) {
+                         handleDecimal(decimal);
+                     } else if (equals) {
+                         handleEquals();
+                     } else if (allClear) {
+                         resetCalculator();
+                     } else if (clear) {
+                         clearLastInput();
+                     }
+                 });
+             });
+
+
+            // --- Notepad Event Listeners (Keep as is) ---
+            notepadTextarea.addEventListener('input', saveNotepad);
+            clearNotepadBtn.addEventListener('click', clearNotepad);
+
+            // --- Initial Load ---
+             loadExchangeRate(); // Load the exchange rate first
+             loadData(); // Load analysis data (uses the loaded rate), renders table, total profit, and result list
+             loadNotepad(); // Load notepad content
+             updateCalcDisplay(); // Initialize calculator display
+
+        });
+    </script>
+
+</body>
+</html>
